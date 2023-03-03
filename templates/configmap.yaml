@@ -1,0 +1,1243 @@
+# Trino
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-config
+data:
+  config.properties: |
+    #single node install config
+    coordinator=true
+    node-scheduler.include-coordinator=true
+    http-server.http.port=8080
+    discovery.uri=http://localhost:8080
+
+  node.properties: |
+    node.id=ffffffff-ffff-ffff-ffff-ffffffffffff
+    node.environment=docker
+    node.data-dir=/data/trino
+    plugin.dir=/usr/lib/trino/plugin
+
+  jvm.config: |
+    -server
+    -Xmx2G
+    -XX:-UseBiasedLocking
+    -XX:+UseG1GC
+    -XX:G1HeapRegionSize=32M
+    -XX:+ExplicitGCInvokesConcurrent
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:+UseGCOverheadLimit
+    -XX:+ExitOnOutOfMemoryError
+    -XX:ReservedCodeCacheSize=256M
+    -Djdk.attach.allowAttachSelf=true
+    -Djdk.nio.maxCachedBufferSize=2000000
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-catalog
+data:
+  chaimeleon.properties: |
+    connector.name=chaimeleon
+    chaimeleon.root-path=/home/chaimeleon/datasets
+    chaimeleon.source-file-name=eForms.json
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datasets
+data:
+  eForms.json: |
+    {
+    "metaproject": "ezcrf_metaproject_name",
+    "chaimeleon_rep_data": [
+      {
+        "var_label": "Chaimeleon ID",
+        "value": 123456,
+        "inclusion_criteria": [
+          {
+            "var_label": "Age at diagnosis (calculated)",
+            "value": 64,
+            "value_type": "integer",
+            "omop_data": {
+                "table_name": "OBSERVATION",
+                "person_id": 123456,
+                "observation_id": 376427,
+                "observation_concept_id": 4307859,
+                "observation_concept_id_label": "Age at diagnosis",
+                "observation_source_value": "423493009",
+                "observation_source_value_vocabulary": "SNOMED",
+                "observation_source_concept_id": 4307859,
+                "value_as_number": 64,
+                "unit_concept_id": 9448,
+                "unit_concept_id_label": "Year",
+                "unit_source_value": "a",
+                "unit_source_value_vocabulary":"UCUM",
+                "observation_date": "2021-01-01",
+                "observation_type_concept_id": 32809
+                }
+              },
+          {
+            "var_label": "Malignant Neoplasm Histotype",
+            "value": "Adenocarcinoma, NOS, of prostate gland",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 476487,
+                "condition_concept_id": 44499685,
+                "condition_concept_id_label:": "Adenocarcinoma, NOS, of prostate gland",
+                "condition_source_value": "8140/3-C61.9",
+                "condition_source_value_vocabulary": "ICDO3",
+                "condition_source_concept_id": 44499685,
+                "condition_start_date": "2021-01-01",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32893
+              }
+            },
+          {
+            "var_label": "Date of first treatment - relative time in days from t0",
+            "value": 30,
+            "value_type": "integer"
+            }
+          ],
+        "patient_data_form": [
+          {
+            "var_label": "Gender",
+            "value": "MALE",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "PERSON",
+                "person_id": 123456,
+                "gender_concept_id": 8507,
+                "gender_concept_id_label": "MALE",
+                "gender_source_value": "M",
+                "gender_source_value_vocabulary": "Gender"
+              }
+            }
+        ],
+        "diagnosis_data_form": [
+          {
+            "var_label": "ECOG Performance status",
+            "value": "ECOG Performance status grade 1",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "OBSERVATION",
+                "person_id": 123456,
+                "observation_id": 276428,
+                "observation_concept_id": 4175026,
+                "observation_concept_id_label": "ECOG Performance status grade 1",
+                "observation_source_value": "425389002",
+                "observation_source_value_vocabulary":"SNOMED",
+                "observation_source_concept_id": 4175026,
+                "observation_date": "2020-12-01",
+                "observation_type_concept_id": 32809
+              }
+            },
+          {
+            "var_label": "Date of performance status record - relative time in days from t0",
+            "value": -30,
+            "value_type": "integer"
+            },
+          {
+            "var_label": "Prostate Imaging–Reporting and Data System (PI-RADS)",
+            "value": "Prostate Imaging Reporting & Data System category 1",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 598428,
+                "measurement_concept_id": 2000000020,
+                "measurement_concept_id_label": "Prostate Imaging Reporting & Data System category 1",
+                "measurement_source_value": "CHAIMELEON_020",
+                "measurement_source_value_vocabulary":"Chaimeleon",
+                "measurement_source_concept_id": 2000000020,
+                "measurement_date": "2020-12-20",
+                "measurement_type_concept_id": 32809
+              }
+            },
+          {
+            "var_label": "PI-RADS report date - relative time in days from t0",
+            "value": -10,
+            "value_type": "integer"
+            },
+          {
+            "var_label": "Malignant Neoplasm Histotype",
+            "value": "Adenocarcinoma, NOS, of prostate gland",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 476487,
+                "condition_concept_id": 44499685,
+                "condition_concept_id_label:": "Adenocarcinoma, NOS, of prostate gland",
+                "condition_source_value": "8140/3-C61.9",
+                "condition_source_value_vocabulary": "ICDO3",
+                "condition_source_concept_id": 44499685,
+                "condition_start_date": "2021-01-01",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32893
+              }
+            },
+          {
+            "var_label": "Neural invasion",
+            "value": "Tumor invasion of perineural tissue present (prostate)",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 566487,
+                "condition_concept_id": 4156560,
+                "condition_concept_id_label:": "Tumor invasion of perineural tissue present (prostate)",
+                "condition_source_value": "372296009",
+                "condition_source_value_vocabulary": "SNOMED",
+                "condition_source_concept_id": 4156560,
+                "condition_start_date": "2021-01-01",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32893
+              }
+            },
+          {
+            "var_label": "Vascular invasion",
+            "value": "No vascular invasion by tumor",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 566487,
+                "condition_concept_id": 4132255,
+                "condition_concept_id_label:": "No vascular invasion by tumor",
+                "condition_source_value": "127494000",
+                "condition_source_value_vocabulary": "SNOMED",
+                "condition_source_concept_id": 4132255,
+                "condition_start_date": "2021-01-01",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32893
+              }
+            },
+          {
+            "var_label": "Lymphatic invasion",
+            "value": "Unknown",
+            "value_type": "string"
+            },
+          {
+            "var_label": "Primary Gleason pattern",
+            "value": "Primary Gleason Pattern 1",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 768428,
+                "measurement_concept_id": 36769081,
+                "measurement_concept_id_label": "Primary Gleason Pattern 1",
+                "measurement_source_value": "OMOP4998758",
+                "measurement_source_value_vocabulary":"Cancer Modifier",
+                "measurement_source_concept_id": 36769081,
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Secondary Gleason pattern",
+            "value": "Secondary Gleason Pattern 2",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 878428,
+                "measurement_concept_id": 36768312,
+                "measurement_concept_id_label": "Secondary Gleason Pattern 2",
+                "measurement_source_value": "OMOP4997987",
+                "measurement_source_value_vocabulary":"Cancer Modifier",
+                "measurement_source_concept_id": 36768312,
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Gleason grade score (Calculated)",
+            "value": "Gleason grade score 3 out of 10",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 676487,
+                "condition_concept_id": 4263220,
+                "condition_concept_id_label": "Gleason grade score 3 out of 10",
+                "condition_source_value": "46677009",
+                "condition_source_value_vocabulary": "SNOMED",
+                "condition_source_concept_id": 4263220,
+                "condition_start_date": "2021-01-01",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32893
+              }
+            },
+          {
+            "var_label": "Gleason grade group (Calculated)",
+            "value": "Gleason grade group 1",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 786487,
+                "condition_concept_id": 3655244,
+                "condition_concept_id_label": "Gleason grade group 1",
+                "condition_source_value": "860742008",
+                "condition_source_value_vocabulary": "SNOMED",
+                "condition_source_concept_id": 3655244,
+                "condition_start_date": "2021-01-01",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32893
+              }
+            },
+          {
+            "var_label": "Presence of Benign prostatic hyperplasia",
+            "value": "No",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "OBSERVATION",
+                "person_id": 123456,
+                "observation_id": 346428,
+                "observation_concept_id": 4253629,
+                "observation_concept_id_label": "Known absent",
+                "observation_source_value": "410516002",
+                "observation_source_value_vocabulary":"SNOMED",
+                "observation_source_concept_id": 4253629,
+                "value_as_concept_id": 198803,
+                "value_as_concept_id_label": "Benign prostatic hyperplasia",
+                "value_source_value": "266569009",
+                "value_source_value_vocabulary": "SNOMED",
+                "observation_date": "2021-01-01",
+                "observation_type_concept_id": 32809
+              }
+            },
+          {
+            "var_label": "Sentinel Lymph Node Evaluation",
+            "value": "Positive",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 458424,
+                "measurement_concept_id": 36768184,
+                "measurement_concept_id_label": "Sentinel Lymph Nodes",
+                "measurement_source_value": "OMOP4997859",
+                "measurement_source_value_vocabulary":"Cancer Modifier",
+                "measurement_source_concept_id": 36768184,
+                "value_as_concept_id": 9191,
+                "value_as_concept_id_label": "Positive",
+                "value_source_value": "10828004",
+                "value_source_value_vocabulary": "SNOMED",
+                "measurement_date": "2021-02-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Sentinel nodes report date - relative time in days from t0",
+            "value": 30,
+            "value_type": "integer"
+            },
+          {
+            "var_label": "Tumor (T) Pathological Category",
+            "value": "pT2",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 490444,
+                "measurement_concept_id": 35918889,
+                "measurement_concept_id_label": "TNM Path T",
+                "measurement_source_value": "880",
+                "measurement_source_value_vocabulary":"NAACCR",
+                "measurement_source_concept_id": 35918889,
+                "value_as_concept_id": 35919074,
+                "value_as_concept_id_label": "pT2",
+                "value_source_value": "880@p2",
+                "value_source_value_vocabulary": "NAACCR",
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Regional Lymph Nodes (N) Pathological Category",
+            "value": "pN0",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 590444,
+                "measurement_concept_id": 35918791,
+                "measurement_concept_id_label": "TNM Path N",
+                "measurement_source_value": "890",
+                "measurement_source_value_vocabulary":"NAACCR",
+                "measurement_source_concept_id": 35918791,
+                "value_as_concept_id": 35919637,
+                "value_as_concept_id_label": "pN0",
+                "value_source_value": "890@p0",
+                "value_source_value_vocabulary": "NAACCR",
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Metastasis (M) Pathological Category",
+            "value": "pM1",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 690444,
+                "measurement_concept_id": 35918319,
+                "measurement_concept_id_label": "TNM Path M",
+                "measurement_source_value": "900",
+                "measurement_source_value_vocabulary":"NAACCR",
+                "measurement_source_concept_id": 35918319,
+                "value_as_concept_id": 35919762,
+                "value_as_concept_id_label": "pM1",
+                "value_source_value": "900@p1",
+                "value_source_value_vocabulary": "NAACCR",
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Calculated TNM Pathological Stage group",
+            "value": "II",
+            "value_type": "string",
+            "omop_data": [{
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 790444,
+                "measurement_concept_id": 35918286,
+                "measurement_concept_id_label": "TNM Path Stage Group",
+                "measurement_source_value": "910",
+                "measurement_source_value_vocabulary":"NAACCR",
+                "measurement_source_concept_id": 35918286,
+                "value_as_concept_id": 35919088,
+                "value_as_concept_id_label": "II",
+                "value_source_value": "910@1",
+                "value_source_value_vocabulary": "NAACCR",
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+                },
+              {
+                "table_name": "OBSERVATION",
+                "person_id": 123456,
+                "observation_id": 566428,
+                "observation_concept_id": 4106622,
+                "observation_concept_id_label": "Calculated",
+                "observation_source_value": "258090004",
+                "observation_source_value_vocabulary":"SNOMED",
+                "observation_source_concept_id": 4106622,
+                "observation_date": "2021-01-01",
+                "observation_type_concept_id": 32809,
+                "observation_event_id": 548428,
+                "obs_event_field_concept_id": 1147729
+                }
+              ]
+            },
+          {
+            "var_label": "User defined TNM Pathological Stage group",
+            "value": null,
+            "value_type": "string"
+            },
+          {
+            "var_label": "Tumor (T) Clinical Category",
+            "value": "cT2",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 890444,
+                "measurement_concept_id": 35918562,
+                "measurement_concept_id_label": "TNM Clin T",
+                "measurement_source_value": "940",
+                "measurement_source_value_vocabulary":"NAACCR",
+                "measurement_source_concept_id": 35918562,
+                "value_as_concept_id": 35919656,
+                "value_as_concept_id_label": "cT2",
+                "value_source_value": "940@c2",
+                "value_source_value_vocabulary": "NAACCR",
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Regional Lymph Nodes (N) Clinical Category",
+            "value": "cN0",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 990444,
+                "measurement_concept_id": 35918746,
+                "measurement_concept_id_label": "TNM Clin N",
+                "measurement_source_value": "950",
+                "measurement_source_value_vocabulary":"NAACCR",
+                "measurement_source_concept_id": 35918746,
+                "value_as_concept_id": 35919626,
+                "value_as_concept_id_label": "cN0",
+                "value_source_value": "950@c0",
+                "value_source_value_vocabulary": "NAACCR",
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Metastasis (M) Clinical Category",
+            "value": "cM1",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 100444,
+                "measurement_concept_id": 35918383,
+                "measurement_concept_id_label": "",
+                "measurement_source_value": "960",
+                "measurement_source_value_vocabulary":"NAACCR",
+                "measurement_source_concept_id": 35918383,
+                "value_as_concept_id": 35919664,
+                "value_as_concept_id_label": "cM1",
+                "value_source_value": "960@c1",
+                "value_source_value_vocabulary": "NAACCR",
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Calculated TNM Clinical Stage group",
+            "value": "IV",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 118428,
+                "measurement_concept_id": 35918597,
+                "measurement_concept_id_label": "TNM Clin Stage Group",
+                "measurement_source_value": "970",
+                "measurement_source_value_vocabulary":"NAACCR",
+                "measurement_source_concept_id": 35918597,
+                "value_as_concept_id": 35919243,
+                "value_as_concept_id_label": "IV",
+                "value_source_value": "970@4",
+                "value_source_value_vocabulary":"NAACCR",
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "User defined TNM Clinical Stage group",
+            "value": "III",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 128428,
+                "measurement_concept_id": 35918597,
+                "measurement_concept_id_label": "TNM Clin Stage Group",
+                "measurement_source_value": "970",
+                "measurement_source_value_vocabulary":"NAACCR",
+                "measurement_source_concept_id": 35918597,
+                "value_as_concept_id": 35919065,
+                "value_as_concept_id_label": "III",
+                "value_source_value": "970@3",
+                "value_source_value_vocabulary":"NAACCR",
+                "measurement_date": "2021-01-01",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 44499685,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "EAU Risk-stratified approach to treatment",
+            "value": "Low risk of recurrence, prostate cancer (PRCA)",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "OBSERVATION",
+                "person_id": 123456,
+                "observation_id": 566428,
+                "observation_concept_id": 2106847,
+                "observation_concept_id_label": "Low risk of recurrence, prostate cancer (PRCA)",
+                "observation_source_value": "3271F",
+                "observation_source_value_vocabulary":"CPT4",
+                "observation_source_concept_id": 2106847,
+                "observation_date": "2021-01-01",
+                "observation_type_concept_id": 32809
+              }
+            },
+          { "Laboratory Studies": [
+            {
+              "entry_num": 1,
+              "field_list": [
+                {
+                  "var_label": "Date - relative time in days from t0",
+                  "value": 15,
+                  "value_type": "integer"
+                  },
+                {
+                  "var_label": "Test name",
+                  "value":"Total prostate specific antigen level",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Value",
+                  "value": 2.6,
+                  "value_type": "float"
+                  },
+                {
+                  "var_label": "Unit",
+                  "value":"nanogram per milliliter",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Range min",
+                  "value": 0,
+                  "value_type": "float"
+                  },
+                {
+                  "var_label": "Range max",
+                  "value": 3,
+                  "value_type": "float"
+                  }
+                ],
+              "omop_data": {
+                  "table_name": "MEASUREMENT",
+                  "person_id": 123456,
+                  "measurement_id": 768428,
+                  "measurement_concept_id": 44793131,
+                  "measurement_concept_id_label": "Total prostate specific antigen level",
+                  "measurement_source_value": "377981000000102",
+                  "measurement_source_value_vocabulary":"SNOMED",
+                  "measurement_source_concept_id": 44793131,
+                  "value_as_number": 2.6,
+                  "range_low": 0,
+                  "range_high": 3,
+                  "unit_concept_id": 8842,
+                  "unit_concept_id_label": "nanogram per milliliter",
+                  "unit_source_value": "ng/mL",
+                  "unit_source_value_vocabulary": "UCUM",
+                  "measurement_date": "2021-01-01",
+                  "measurement_type_concept_id": 32809
+                }
+              },
+            {
+              "entry_num": 2,
+              "field_list": [
+                {
+                  "var_label": "Date - relative time in days from t0",
+                  "value": 20,
+                  "value_type": "integer"
+                  },
+                {
+                  "var_label": "Test name",
+                  "value":"Serum testosterone measurement",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Value",
+                  "value": 5.3,
+                  "value_type": "float"
+                  },
+                {
+                  "var_label": "Unit",
+                  "value":"nanomole per liter",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Range min",
+                  "value": 3,
+                  "value_type": "float"
+                  },
+                {
+                  "var_label": "Range max",
+                  "value": 10,
+                  "value_type": "float"
+                  }
+                ],
+              "omop_data": {
+                  "table_name": "MEASUREMENT",
+                  "person_id": 123456,
+                  "measurement_id": 768428,
+                  "measurement_concept_id": 4156642,
+                  "measurement_concept_id_label": "Serum testosterone measurement",
+                  "measurement_source_value": "270973006",
+                  "measurement_source_value_vocabulary":"SNOMED",
+                  "measurement_source_concept_id": 4156642,
+                  "value_as_number": 5.3,
+                  "range_low": 3,
+                  "range_high": 10,
+                  "unit_concept_id": 8736,
+                  "unit_concept_id_label": "nanomole per liter",
+                  "unit_source_value": "nmol/L",
+                  "unit_source_value_vocabulary": "UCUM",
+                  "measurement_date": "2021-01-01",
+                  "measurement_type_concept_id": 32809
+                }
+              }
+            ]
+          }
+        ],
+        "treatment_data":[
+          {
+            "var_label": "Deferred treatment",
+            "value": "No deferred treatment",
+            "value_type": "string"
+            },
+          {
+            "var_label": " Deferred - relative time in days from t1",
+            "value": null,
+            "value_type": "integer"
+            },
+          {
+            "var_label": "Surgery",
+            "value": "Radical perineal prostatectomy",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "PROCEDURE_OCCURRENCE",
+                "person_id": 123456,
+                "procedure_occurrence_id": 789795,
+                "procedure_concept_id": 4338373,
+                "procedure_concept_id_label": "Radical perineal prostatectomy",
+                "procedure_source_value": "8782006",
+                "procedure_source_value_vocabulary": "SNOMED",
+                "procedure_source_concept_id": 4338373,
+                "procedure_date": "2021-04-01",
+                "procedure_type_concept_id": 32809
+              }
+            },
+          {
+            "var_label": " Date of surgery - relative time in days from t1",
+            "value": 0,
+            "value_type": "integer"
+            },
+          {
+            "var_label": "Pelvic lymph node dissection",
+            "value": "True",
+            "value_type": "boolean",
+            "omop_data": {
+                "table_name": "PROCEDURE_OCCURRENCE",
+                "person_id": 123456,
+                "procedure_occurrence_id": 819734,
+                "procedure_concept_id": 4030412,
+                "procedure_concept_id_label": "Pelvic lymphadenectomy",
+                "procedure_source_value": "14059008",
+                "procedure_source_value_vocabulary": "SNOMED",
+                "procedure_source_concept_id": 4030412,
+                "procedure_date": "2021-04-01",
+                "procedure_type_concept_id": 32809
+              }
+            },
+          {
+            "var_label": "Radiotherapy",
+            "value": "No",
+            "value_type": "string"
+            },
+          {
+            "var_label": "Androgen deprivation therapy",
+            "value": "Yes",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "PROCEDURE_OCCURRENCE",
+                "person_id": 123456,
+                "procedure_occurrence_id": 549766,
+                "procedure_concept_id": 45768763,
+                "procedure_concept_id_label": "Androgen deprivation therapy",
+                "procedure_source_value": "707266006",
+                "procedure_source_value_vocabulary": "SNOMED",
+                "procedure_source_concept_id": 45768763,
+                "procedure_date": "2021-04-01",
+                "procedure_type_concept_id": 32809
+              }
+            },
+          {
+            "var_label": "Chemotherapy",
+            "value": "YES",
+            "value_type": "string",
+            "omop_data": {
+              "table_name": "PROCEDURE_OCCURRENCE",
+              "person_id": 123456,
+              "procedure_occurrence_id": 999766,
+              "procedure_concept_id": 4273629,
+              "procedure_concept_id_label": "Chemotherapy",
+              "procedure_source_value": "367336001",
+              "procedure_source_value_vocabulary": "SNOMED",
+              "procedure_source_concept_id": 4273629,
+              "procedure_date": "2021-04-01",
+              "procedure_type_concept_id": 32809
+              }
+            },
+          {
+            "Androgen deprivation treatment drugs": [
+            {
+              "entry_num": 1,
+              "field_list": [
+                {
+                  "var_label": "Type of drug",
+                  "var_value": "Gonadotropin releasing hormone analogues",
+                  "value_type": "string"
+                },
+                {
+                  "var_label": "Drug treatment start date - relative time in days from t1",
+                  "var_value": 15,
+                  "value_type": "integer"
+                },
+                {
+                  "var_label": "Drug treatment end date - relative time in days from t1",
+                  "var_value": 45,
+                  "value_type": "integer"
+                }
+              ],
+              "omop_data": {
+                  "table_name": "DRUG_EXPOSURE",
+                  "person_id": 123456,
+                  "drug_exposure_id": 908315,
+                  "drug_concept_id": 21603823,
+                  "drug_concept_id_label": "Gonadotropin releasing hormone analogues",
+                  "drug_source_value": "L02AE",
+                  "drug_source_value_vocabulary": "ATC",
+                  "drug_source_concept_id" : 21603823,
+                  "drug_exposure_start_date": "2021-04-15",
+                  "drug_exposure_end_date": "2021-05-31",
+                  "drug_type_concept_id": 32809
+                }
+              }
+              ]
+            },
+          {
+            "Chemotherapy specific drugs": [
+            {
+              "entry_num": 1,
+              "field_list": [
+                {
+                  "var_label": "Type of drug",
+                  "var_value": "Docetaxel Injection",
+                  "value_type": "string"
+                },
+                {
+                  "var_label": "Drug treatment start date - relative time in days from t1",
+                  "var_value": 15,
+                  "value_type": "integer"
+                },
+                {
+                  "var_label": "Drug treatment end date - relative time in days from t1",
+                  "var_value": 45,
+                  "value_type": "integer"
+                }
+              ],
+              "omop_data": {
+                  "table_name": "DRUG_EXPOSURE",
+                  "person_id": 123456,
+                  "drug_exposure_id": 955315,
+                  "drug_concept_id": 1718757,
+                  "drug_concept_id_label": "Docetaxel Injection",
+                  "drug_source_value": "1860479",
+                  "drug_source_value_vocabulary": "RxNorm",
+                  "drug_source_concept_id" : 1718757,
+                  "drug_exposure_start_date": "2021-04-15",
+                  "drug_exposure_end_date": "2021-05-31",
+                  "drug_type_concept_id": 32809
+                }
+              }
+              ]
+            }
+        ],
+        "follow_up_data":[
+          {
+            "var_label": "Bladder control",
+            "value": "Urinary incontinence",
+            "value_type": "string",
+            "omop_data":
+            {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 296897,
+                "condition_concept_id": 197672,
+                "condition_concept_id_label:": "Urinary incontinence",
+                "condition_source_value": "165232002",
+                "condition_source_value_vocabulary": "SNOMED",
+                "condition_source_concept_id": 197672,
+                "condition_start_date": "2021-06-30",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32893
+              }
+            },
+          {
+            "var_label": "Bowel control",
+            "value": "Bowels: fully continent",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 306897,
+                "condition_concept_id": 4080323,
+                "condition_concept_id_label:": "Bowels: fully continent",
+                "condition_source_value": "24029004",
+                "condition_source_value_vocabulary": "SNOMED",
+                "condition_source_concept_id": 4080323,
+                "condition_start_date": "2021-06-30",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32893
+              }
+            },
+          {
+            "var_label": "Sexual function",
+            "value": "Unknown",
+            "value_type": "string"
+            },
+          {
+            "var_label": "ECOG Performance status FUP",
+            "value": "ECOG Performance status grade 1",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "OBSERVATION",
+                "person_id": 123456,
+                "observation_id": 276428,
+                "observation_concept_id": 4175026,
+                "observation_concept_id_label": "ECOG Performance status grade 1",
+                "observation_source_value": "425389002",
+                "observation_source_value_vocabulary":"SNOMED",
+                "observation_source_concept_id": 4175026,
+                "observation_date": "2020-06-30",
+                "observation_type_concept_id": 32809
+              }
+            },
+          {
+            "var_label": "Date of performance status record FUP - relative time in days from t1",
+            "value": 90,
+            "value_type": "integer"
+            },
+          {
+            "var_label": "Diagnosis",
+            "value": "Hormone refractory prostate cancer",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 326897,
+                "condition_concept_id": 4141960,
+                "condition_concept_id_label:": "Hormone refractory prostate cancer",
+                "condition_source_value": "427492003",
+                "condition_source_value_vocabulary": "SNOMED",
+                "condition_source_concept_id": 4141960,
+                "condition_start_date": "2020-06-30",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32893
+              }
+            },
+          {
+            "var_label": "Date of castration status diagnosis - relative time in days from t1",
+            "value": 90,
+            "value_type": "integer"
+            },
+          {
+            "var_label": "Progression or recurrence",
+            "value": "Tumor Progression",
+            "value_type": "string",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 336897,
+                "condition_concept_id": 4168352,
+                "condition_concept_id_label:": "Tumor Progression",
+                "condition_source_value": "419835002",
+                "condition_source_value_vocabulary": "SNOMED",
+                "condition_source_concept_id": 4168352,
+                "condition_start_date": "2020-07-30",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32893
+              }
+            },
+          {
+            "var_label": "Date of progression/recurrence diagnosis - relative time in days from t1",
+            "value": 120,
+            "value_type": "integer"
+            },
+          {
+            "var_label": "Local recurrence or progression",
+            "value": "True",
+            "value_type": "boolean",
+            "omop_data": {
+                "table_name": "OBSERVATION",
+                "person_id": 123456,
+                "observation_id": 926428,
+                "observation_concept_id": 4114651,
+                "observation_concept_id_label": "Local",
+                "observation_source_value": "255470001",
+                "observation_source_value_vocabulary":"SNOMED",
+                "observation_source_concept_id": 4114651,
+                "observation_date": "2020-07-30",
+                "observation_type_concept_id": 32809,
+                "observation_event_id": 336897,
+                "obs_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Lymph Nodes Metastasis",
+            "value": "True",
+            "value_type": "boolean",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 928428,
+                "measurement_concept_id": 36768989,
+                "measurement_concept_id_label": "Lymph Nodes with Metastasis",
+                "measurement_source_value": "OMOP4998666",
+                "measurement_source_value_vocabulary":"Cancer Modifier",
+                "measurement_source_concept_id": 36768989,
+                "measurement_date": "2020-07-30",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 336897,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Metastasis to the Viscera",
+            "value": "False",
+            "value_type": "boolean"
+            },
+          {
+            "var_label": "Metastasis to the Bone",
+            "value": "True",
+            "value_type": "boolean",
+            "omop_data": {
+                "table_name": "MEASUREMENT",
+                "person_id": 123456,
+                "measurement_id": 928428,
+                "measurement_concept_id": 36769301,
+                "measurement_concept_id_label": "Metastasis to the Bone",
+                "measurement_source_value": "OMOP4998978",
+                "measurement_source_value_vocabulary":"Cancer Modifier",
+                "measurement_source_concept_id": 36769301,
+                "measurement_date": "2020-07-30",
+                "measurement_type_concept_id": 32809,
+                "measurement_event_id": 336897,
+                "meas_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Distant Metastasis NOS",
+            "value": "False",
+            "value_type": "boolean"
+            },
+          {
+            "var_label": "Date of death (if applicable)",
+            "value": "2021-08-11",
+            "value_type": "ISO date format",
+            "omop_data": {
+              "table_name": "DEATH",
+              "person_id": 123456,
+              "death_date": "2021-08-30"
+              }
+            },
+          {
+            "var_label": "Date of death - relative time in days from t1",
+            "value": 151,
+            "value_type": "integer"
+            },
+          {
+            "var_label": "Death related to underlying Prostate Cancer",
+            "value": "True",
+            "value_type": "boolean",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 206897,
+                "condition_concept_id": 44499685,
+                "condition_concept_id_label:": "Adenocarcinoma, NOS, of prostate gland",
+                "condition_source_value": "8140/3-C61.9",
+                "condition_source_value_vocabulary": "ICDO3",
+                "condition_source_concept_id": 44499685,
+                "condition_start_date": "2021-08-11",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32911,
+                "condition_status_concept_id_label": "Underlying cause of death"
+              }
+            },
+          {
+            "var_label": "Date of last contact",
+            "value": "2020-08-01",
+            "value_type": "ISO date format",
+            "omop_data": {
+                "table_name": "OBSERVATION",
+                "person_id": 123456,
+                "observation_id": 896438,
+                "observation_concept_id": 3016125,
+                "observation_concept_id_label": "Date last contact",
+                "observation_source_value": "21975-8",
+                "observation_source_value_vocabulary":"LOINC",
+                "observation_source_concept_id": 3016125,
+                "observation_date": "2020-07-30",
+                "observation_type_concept_id": 32809,
+                "observation_event_id": 336897,
+                "obs_event_field_concept_id": 1147663
+              }
+            },
+          {
+            "var_label": "Date of last contact - relative time in days from t1",
+            "value": 141,
+            "value_type": "integer"
+            },
+          {
+            "var_label": "Vital status at the end of follow-up period (12m)",
+            "value":"Dead",
+            "value_type":"string",
+            "omop_data": {
+                "table_name": "CONDITION_OCURRENCE",
+                "person_id": 123456,
+                "condition_occurrence_id": 206897,
+                "condition_concept_id": 434489,
+                "condition_concept_id_label:": "Dead",
+                "condition_source_value": "419099009",
+                "condition_source_value_vocabulary": "SNOMED",
+                "condition_source_concept_id": 434489,
+                "condition_start_date": "2021-08-11",
+                "condition_type_concept_id": 32809,
+                "condition_status_concept_id": 32908
+              }
+            },
+          { "PSA results": [
+            {
+              "entry_num": 1,
+              "field_list": [
+                {
+                  "var_label": "Date - relative time in days from t1",
+                  "value": 90,
+                  "value_type": "integer"
+                  },
+                {
+                  "var_label": "Test name",
+                  "value":"Total prostate specific antigen level",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Value",
+                  "value": 15,
+                  "value_type": "float"
+                  },
+                {
+                  "var_label": "Unit",
+                  "value":"nanogram per milliliter",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Range min",
+                  "value": 0,
+                  "value_type": "float"
+                  },
+                {
+                  "var_label": "Range max",
+                  "value": 3,
+                  "value_type": "float"
+                  }
+                ],
+              "omop_data": {
+                  "table_name": "MEASUREMENT",
+                  "person_id": 123456,
+                  "measurement_id": 768428,
+                  "measurement_concept_id": 10793341,
+                  "measurement_concept_id_label": "Total prostate specific antigen level",
+                  "measurement_source_value": "377981000000102",
+                  "measurement_source_value_vocabulary":"SNOMED",
+                  "measurement_source_concept_id": 44793131,
+                  "value_as_number": 15,
+                  "range_low": 0,
+                  "range_high": 3,
+                  "unit_concept_id": 8842,
+                  "unit_concept_id_label": "nanogram per milliliter",
+                  "unit_source_value": "ng/mL",
+                  "unit_source_value_vocabulary": "UCUM",
+                  "measurement_date": "2020-06-30",
+                  "measurement_type_concept_id": 32809
+                  }
+              },
+            {
+              "entry_num": 2,
+              "field_list": [
+                {
+                  "var_label": "Date - relative time in days from t1",
+                  "value": 120,
+                  "value_type": "integer"
+                  },
+                {
+                  "var_label": "Test name",
+                  "value":"Total prostate specific antigen level",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Value",
+                  "value": 20,
+                  "value_type": "float"
+                  },
+                {
+                  "var_label": "Unit",
+                  "value":"nanogram per milliliter",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Range min",
+                  "value": 0,
+                  "value_type": "float"
+                  },
+                {
+                  "var_label": "Range max",
+                  "value": 3,
+                  "value_type": "float"
+                  }
+                ],
+              "omop_data": {
+                  "table_name": "MEASUREMENT",
+                  "person_id": 123456,
+                  "measurement_id": 768428,
+                  "measurement_concept_id": 90793131,
+                  "measurement_concept_id_label": "Total prostate specific antigen level",
+                  "measurement_source_value": "377981000000102",
+                  "measurement_source_value_vocabulary":"SNOMED",
+                  "measurement_source_concept_id": 44793131,
+                  "value_as_number": 20.0,
+                  "range_low": 0,
+                  "range_high": 3,
+                  "unit_concept_id": 8842,
+                  "unit_concept_id_label": "nanogram per milliliter",
+                  "unit_source_value": "ng/mL",
+                  "unit_source_value_vocabulary": "UCUM",
+                  "measurement_date": "2020-07-30",
+                  "measurement_type_concept_id": 32809
+                }
+              }
+            ]
+          }
+        ],
+        "imaging_data":
+        { "imaging_studies":[
+          {
+            "entry_num": 1,
+            "field_list": [
+              {
+                "var_label": "Date - relative time in days from t0",
+                "value": -15,
+                "value_type": "integer"
+                },
+      

@@ -1,0 +1,14 @@
+apiVersion: v1
+
+name: chaimeleon-superset
+
+description: A generated Helm Chart for chaimeleon-superset
+
+type: application
+
+version: 0.0.1
+
+keywords:
+  - chaimeleon-superset
+
+#icon: https://bahiasoftware-chaimeleon.s3.eu-west-1.amazonaws.com/helm/resources/rstudio-icon.png

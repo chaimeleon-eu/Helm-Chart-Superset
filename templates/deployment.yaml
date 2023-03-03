@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-superset
+  labels:
+    app: {{ .Release.Name }}-superset
+  annotations:
+    chaimeleon.eu/datasetsIDs: "{{ .Values.datasets_list }}"
+    chaimeleon.eu/toolName: "{{ .Chart.Name }}"
+    chaimeleon.eu/toolVersion: "{{ .Chart.Version }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-superset
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-superset
+    spec:
+      containers:
+        - name: superset
+          {{- if eq .Values.platform "chaimeleon" }}
+          image: {{ include "chaimeleon.library-url" . }}/bahia-software/superset:latest
+          {{- else }}
+          image: public.ecr.aws/e6k1b4j9/chaimeleon/superset:latest
+          {{- end }}
+          imagePullPolicy: Always
+          ports:
+            #- containerPort: 8088
+            - containerPort: 2222
+              name: sshd
+            - containerPort: 5900
+              name: vnc-gui
+          volumeMounts:
+          {{- if eq .Values.platform "chaimeleon" }}
+          - name: datalake
+            mountPath: "{{- include "chaimeleon.datalake.mount_point" . -}}"
+          - name: superset-home
+            mountPath: "{{- include "chaimeleon.persistent_home.mount_point" . -}}"            
+          - name: shared-folder
+            mountPath: "{{- include "chaimeleon.persistent_shared_folder.mount_point" . -}}"
+          
+          #volumeMounts:
+          #  - name: superset-home
+          #    mountPath: /app/superset_home
+          #  - name: superset-config
+          #    mountPath: /app/pythonpath/superset_config.py
+          #    subPath: superset_config.py
+          #volumeMounts:
+          #  - mountPath: /app/pythonpath/superset_config.py
+          #    name: superset-persistent-storage0
+          #  - mountPath: /app/pythonpath/custom_sso_security_manager.py
+          #    name: superset-persistent-storage1
+          #  - mountPath: /app/superset_home
+          #    name: superset-persistent-storage2
+          resources:
+            requests:
+              memory: "{{ .Values.requests.memory }}"
+              cpu: "{{ .Values.requests.cpu }}"
+        
+        - name: trino
+          image: trinodb/trino:368
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: trino-config
+              mountPath: /etc/trino
+            - name: trino-catalog
+              mountPath: /etc/trino/catalog
+            - name: datasets
+              mountPath: /home/chaimeleon/datasets/test
+          resources:
+            requests:
+              memory: "{{ .Values.requests.memory }}"
+              cpu: "{{ .Values.requests.cpu }}"
+              
+            #{{- if eq .Values.platform "chaimeleon" }}
+            #{{- if .Values.datasets_list }}
+            #{{- range $datasetID := splitList "," .Values.datasets_list }}
+            #- name: "{{ $datasetID -}}"
+            #  mountPath: "{{- include "chaimeleon.datasets.mount_point" $ -}}/{{- $datasetID -}}"              
+            #{{- end }}
+            #{{- end }}
+            #{{- end }}
+
+      restartPolicy: Always
+      volumes:
+        - name: shared-data
+          emptyDir: {}
+        #- name: superset-config
+        #  configMap: 
+        #    name: superset-config
+        - name: datasets
+          configMap: 
+            name: datasets
+        - name: trino-config
+          configMap: 
+            name: trino-config
+        - name: trino-catalog
+          configMap: 
+            name: trino-catalog
+            
+      {{- if eq .Values.platform "chaimeleon" }}
+      securityContext:
+        runAsUser: {{ include "chaimeleon.user.uid" . }}
+        runAsGroup: {{ include "chaimeleon.group.gid" . }}
+        fsGroup: {{ include "chaimeleon.user.uid" . }}
+        supplementalGroups: [ {{ include "chaimeleon.ceph.gid" . }} ]
+      
+      priorityClassName: processing-applications
+      {{- end }}
+
+      env:
+          # password for VNC access (empty username)
+          #- name: VNC_PASSWORD
+          #  valueFrom:
+          #    secretKeyRef:
+          #      name: "{{ include "jupyter-tensorflow.fullname" . }}"
+          #      key: container-password
+                
+          #- name: VNC_HOST
+          #  # this is the DNS name of the service
+          #  value: "{{ include "jupyter-tensorflow.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+
+          # Parameters required for automatically create the connection in Guacamole for this container
+          - name: GUACAMOLE_URL
+            value: "{{ include "chaimeleon.guacamole-url" . }}"
+          - name: GUACD_HOST
+            value: "{{ include "chaimeleon.guacd-host" . }}"
+          - name: GUACAMOLE_USER
+            {{- include "chaimeleon.guacamole-user-value" . | nindent 12 }}
+          - name: GUACAMOLE_PASSWORD
+            {{- include "chaimeleon.guacamole-password-value" . | nindent 12 }}
+          - name: GUACAMOLE_CONNECTION_NAME
+            value: "{{- include "jupyter-tensorflow.connectionName" . -}}"
+
+          - name: SSH_ENABLE_PASSWORD_AUTH
+            value: "true"
+          - name: GATEWAY_PORTS
+            value: "true"
+          - name: TCP_FORWARDING
+            value: "true"

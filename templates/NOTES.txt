@@ -1,0 +1,9 @@
+Thank you for installing {{ .Chart.Name }}.
+Your release is named {{ .Release.Name }}.
+
+Your instance is accessible in the following URL:
+{{- if eq .Values.platform "chaimeleon" }}
+https://chaimeleon-eu.i3m.upv.es{{ include "superset.rootpath" . }}
+{{- else }}
+http://a7c3f7573dd794dc596be03418454b54-6c951f6edb4272e2.elb.eu-west-1.amazonaws.com{{ include "superset.rootpath" . }}
+{{- end }}

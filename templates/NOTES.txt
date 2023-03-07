@@ -1,9 +1,29 @@
 Thank you for installing {{ .Chart.Name }}.
 Your release is named {{ .Release.Name }}.
 
-Your instance is accessible in the following URL:
 {{- if eq .Values.platform "chaimeleon" }}
-https://chaimeleon-eu.i3m.upv.es{{ include "superset.rootpath" . }}
+When the application is ready it will be accesible via Guacamole in the following URL: 
+  {{ include "chaimeleon.guacamole-url" . }}
+
+There should be a connection created for that desktop with the following name: 
+  {{ include "superset.connectionName" . }}
+It can take few seconds to appear (refresh the page if you do not see it).
+
+And remember...
+
+    To show/hide the Guacamole menu: CTRL+SHIFT+ALT
+
+    In the file explorer, there will be three important directories:
+     - {{ include "chaimeleon.datasets.mount_point" . }}
+       [All the datasets you selected to work with]
+
+     - {{ include "chaimeleon.persistent_home.mount_point" . }}
+       [Private persistent storage: for your algoritms, results and whatever you need for the work]
+
+     - {{ include "chaimeleon.persistent_shared_folder.mount_point" . }}
+        [Public storage where you can share files with the other CHAIMELEON users]
+
 {{- else }}
+Your instance is accessible in the following URL:
 http://a7c3f7573dd794dc596be03418454b54-6c951f6edb4272e2.elb.eu-west-1.amazonaws.com{{ include "superset.rootpath" . }}
 {{- end }}

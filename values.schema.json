@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "requests": {
+      "type": "object",
+      "form": true,
+      "title": "Minimum requests",
+      "properties": {
+        "cpu": {
+          "type": "string",
+          "title": "CPUs",
+          "description": "How many CPUs do you need? (Examples: 0.5, 1, 2, ...)",
+          "form": true
+        },
+        "memory": {
+          "type": "string",
+          "title": "Memory",
+          "description": "How much memory do you need? (Examples: 200Mi, 1Gi, 4Gi, ...)",
+          "form": true
+        }
+      }
+    },
+    "datasets_list": {
+      "type": "string",
+      "title": "Dataset list",
+      "description": "A comma separated list of the datasets that will be available at the container. (It can be empty)",
+      "form": true
+    }
+  }
+}

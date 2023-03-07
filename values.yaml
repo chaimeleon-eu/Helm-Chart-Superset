@@ -8,4 +8,4 @@ configmaps:
   ceph: "ceph-info"
   chaimeleon: "chaimeleon"
 
-platform: chaimeleo
+platform: chaimeleon

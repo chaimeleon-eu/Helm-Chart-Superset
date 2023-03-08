@@ -71,6 +71,9 @@ spec:
               mountPath: /etc/trino/catalog
             - name: datasets
               mountPath: /home/chaimeleon/datasets/test
+            - name: trino-plugin
+              mountPath: /usr/lib/trino/plugin/chaimeleon
+              
           resources:
             requests:
               memory: "{{ .Values.requests.memory }}"
@@ -101,6 +104,9 @@ spec:
         - name: trino-catalog
           configMap: 
             name: trino-catalog
+        - name: trino-plugin
+          hostPath:
+            path: /plugin/chaimeleon
             
       {{- if eq .Values.platform "chaimeleon" }}
       securityContext:

@@ -70,7 +70,7 @@ spec:
             mountPath: "{{- include "chaimeleon.persistent_home.mount_point" . -}}"            
           - name: shared-folder
             mountPath: "{{- include "chaimeleon.persistent_shared_folder.mount_point" . -}}"
-
+          
           #volumeMounts:
           #  - name: superset-home
           #    mountPath: /app/superset_home
@@ -99,6 +99,9 @@ spec:
               mountPath: /etc/trino/catalog
             - name: datasets
               mountPath: /home/chaimeleon/datasets/test
+            - name: trino-plugin
+              mountPath: /usr/lib/trino/plugin/chaimeleon
+              
           resources:
             requests:
               memory: "{{ .Values.requests.memory }}"
@@ -129,8 +132,11 @@ spec:
         - name: trino-catalog
           configMap: 
             name: trino-catalog
-        
-        {{- if eq .Values.platform "chaimeleon" }}
+        - name: trino-plugin
+          hostPath:
+            path: /plugin/chaimeleon
+            
+      {{- if eq .Values.platform "chaimeleon" }}
         - name: datalake
           {{- include "chaimeleon.datalake.volume" . | nindent 10 }}
         - name: superset-home

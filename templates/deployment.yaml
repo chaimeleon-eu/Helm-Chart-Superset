@@ -90,7 +90,11 @@ spec:
               cpu: "{{ .Values.requests.cpu }}"
         
         - name: trino
+          {{- if eq .Values.platform "chaimeleon" }}
+          image: {{ include "chaimeleon.library-url" . }}/bahia-software/trino:368.1
+          {{- else }}
           image: trinodb/trino:368
+          {{- end }}
           imagePullPolicy: Always
           volumeMounts:
             - name: trino-config
@@ -99,8 +103,10 @@ spec:
               mountPath: /etc/trino/catalog
             - name: datasets
               mountPath: /home/chaimeleon/datasets/test
+            {{- if not ( eq .Values.platform "chaimeleon" ) }}
             - name: trino-plugin
               mountPath: /usr/lib/trino/plugin/chaimeleon
+            {{- end }}
               
           resources:
             requests:
@@ -132,11 +138,13 @@ spec:
         - name: trino-catalog
           configMap: 
             name: trino-catalog
+        {{- if not ( eq .Values.platform "chaimeleon" ) }}
         - name: trino-plugin
           hostPath:
             path: /plugin/chaimeleon
-            
-      {{- if eq .Values.platform "chaimeleon" }}
+        {{- end }}
+        
+        {{- if eq .Values.platform "chaimeleon" }}
         - name: datalake
           {{- include "chaimeleon.datalake.volume" . | nindent 10 }}
         - name: superset-home

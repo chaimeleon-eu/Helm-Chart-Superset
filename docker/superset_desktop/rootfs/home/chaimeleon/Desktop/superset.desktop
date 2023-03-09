@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Superset
+Exec=firefox http://localhost:8088
+Path=/home/chaimeleon

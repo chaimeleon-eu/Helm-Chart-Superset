@@ -5,9 +5,7 @@ metadata:
   labels:
     app: {{ .Release.Name }}-superset
   annotations:
-    chaimeleon.eu/datasetsIDs: "{{ .Values.datasets_list }}"
-    chaimeleon.eu/toolName: "{{ .Chart.Name }}"
-    chaimeleon.eu/toolVersion: "{{ .Chart.Version }}"
+    {{- include "chaimeleon.annotations" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -23,11 +21,41 @@ spec:
       containers:
         - name: superset
           {{- if eq .Values.platform "chaimeleon" }}
-          image: {{ include "chaimeleon.library-url" . }}/bahia-software/superset:latest
+          image: {{ include "chaimeleon.library-url" . }}/bahia-software/superset_desktop:latest
           {{- else }}
           image: public.ecr.aws/e6k1b4j9/chaimeleon/superset:latest
           {{- end }}
           imagePullPolicy: Always
+          env:
+            # password for VNC access (empty username)
+            #- name: VNC_PASSWORD
+            #  valueFrom:
+            #    secretKeyRef:
+            #      name: "{{ .Release.Name }}-superset"
+            #      key: container-password
+                  
+            #- name: VNC_HOST
+            #  # this is the DNS name of the service
+            #  value: "{{ .Release.Name }}-superset.{{ .Release.Namespace }}.svc.cluster.local"
+
+            # Parameters required for automatically create the connection in Guacamole for this container
+            - name: GUACAMOLE_URL
+              value: "{{ include "chaimeleon.guacamole-url" . }}"
+            - name: GUACD_HOST
+              value: "{{ include "chaimeleon.guacd-host" . }}"
+            - name: GUACAMOLE_USER
+              {{- include "chaimeleon.guacamole-user-value" . | nindent 14 }}
+            - name: GUACAMOLE_PASSWORD
+              {{- include "chaimeleon.guacamole-password-value" . | nindent 14 }}
+            - name: GUACAMOLE_CONNECTION_NAME
+              value: "{{- include "superset.connectionName" . -}}"
+
+            - name: SSH_ENABLE_PASSWORD_AUTH
+              value: "true"
+            - name: GATEWAY_PORTS
+              value: "true"
+            - name: TCP_FORWARDING
+              value: "true"
           ports:
             #- containerPort: 8088
             - containerPort: 2222
@@ -42,7 +70,7 @@ spec:
             mountPath: "{{- include "chaimeleon.persistent_home.mount_point" . -}}"            
           - name: shared-folder
             mountPath: "{{- include "chaimeleon.persistent_shared_folder.mount_point" . -}}"
-          
+
           #volumeMounts:
           #  - name: superset-home
           #    mountPath: /app/superset_home
@@ -62,7 +90,11 @@ spec:
               cpu: "{{ .Values.requests.cpu }}"
         
         - name: trino
+          {{- if eq .Values.platform "chaimeleon" }}
+          image: {{ include "chaimeleon.library-url" . }}/bahia-software/trino:368.1
+          {{- else }}
           image: trinodb/trino:368
+          {{- end }}
           imagePullPolicy: Always
           volumeMounts:
             - name: trino-config
@@ -71,8 +103,10 @@ spec:
               mountPath: /etc/trino/catalog
             - name: datasets
               mountPath: /home/chaimeleon/datasets/test
+            {{- if not ( eq .Values.platform "chaimeleon" ) }}
             - name: trino-plugin
               mountPath: /usr/lib/trino/plugin/chaimeleon
+            {{- end }}
               
           resources:
             requests:
@@ -104,9 +138,27 @@ spec:
         - name: trino-catalog
           configMap: 
             name: trino-catalog
+        {{- if not ( eq .Values.platform "chaimeleon" ) }}
         - name: trino-plugin
           hostPath:
             path: /plugin/chaimeleon
+        {{- end }}
+        
+        {{- if eq .Values.platform "chaimeleon" }}
+        - name: datalake
+          {{- include "chaimeleon.datalake.volume" . | nindent 10 }}
+        - name: superset-home
+          {{- include "chaimeleon.persistent_home.volume" . | nindent 10 }}
+        - name: shared-folder
+          {{- include "chaimeleon.persistent_shared_folder.volume" . | nindent 10 }}
+        
+        {{- if .Values.datasets_list }}
+        {{- range $datasetID := splitList "," .Values.datasets_list }}
+        - name: "{{ $datasetID -}}"
+          {{- include "chaimeleon.dataset.volume" (list $ $datasetID) | nindent 10 }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
             
       {{- if eq .Values.platform "chaimeleon" }}
       securityContext:
@@ -118,33 +170,3 @@ spec:
       priorityClassName: processing-applications
       {{- end }}
 
-      env:
-          # password for VNC access (empty username)
-          #- name: VNC_PASSWORD
-          #  valueFrom:
-          #    secretKeyRef:
-          #      name: "{{ include "jupyter-tensorflow.fullname" . }}"
-          #      key: container-password
-                
-          #- name: VNC_HOST
-          #  # this is the DNS name of the service
-          #  value: "{{ include "jupyter-tensorflow.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
-
-          # Parameters required for automatically create the connection in Guacamole for this container
-          - name: GUACAMOLE_URL
-            value: "{{ include "chaimeleon.guacamole-url" . }}"
-          - name: GUACD_HOST
-            value: "{{ include "chaimeleon.guacd-host" . }}"
-          - name: GUACAMOLE_USER
-            {{- include "chaimeleon.guacamole-user-value" . | nindent 12 }}
-          - name: GUACAMOLE_PASSWORD
-            {{- include "chaimeleon.guacamole-password-value" . | nindent 12 }}
-          - name: GUACAMOLE_CONNECTION_NAME
-            value: "{{- include "jupyter-tensorflow.connectionName" . -}}"
-
-          - name: SSH_ENABLE_PASSWORD_AUTH
-            value: "true"
-          - name: GATEWAY_PORTS
-            value: "true"
-          - name: TCP_FORWARDING
-            value: "true"

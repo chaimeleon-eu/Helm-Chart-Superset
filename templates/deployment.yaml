@@ -21,7 +21,7 @@ spec:
       containers:
         - name: superset
           {{- if eq .Values.platform "chaimeleon" }}
-          image: {{ include "chaimeleon.library-url" . }}/bahia-software/superset:latest
+          image: {{ include "chaimeleon.library-url" . }}/bahia-software/superset_desktop:latest
           {{- else }}
           image: public.ecr.aws/e6k1b4j9/chaimeleon/superset:latest
           {{- end }}
@@ -70,7 +70,7 @@ spec:
             mountPath: "{{- include "chaimeleon.persistent_home.mount_point" . -}}"            
           - name: shared-folder
             mountPath: "{{- include "chaimeleon.persistent_shared_folder.mount_point" . -}}"
-          
+
           #volumeMounts:
           #  - name: superset-home
           #    mountPath: /app/superset_home

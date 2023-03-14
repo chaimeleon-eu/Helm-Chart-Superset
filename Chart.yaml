@@ -6,7 +6,7 @@ description: A generated Helm Chart for chaimeleon-superset
 
 type: application
 
-version: 0.0.2
+version: 0.0.3
 
 keywords:
   - chaimeleon-superset

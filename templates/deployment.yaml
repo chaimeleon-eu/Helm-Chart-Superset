@@ -70,7 +70,8 @@ spec:
             mountPath: "{{- include "chaimeleon.persistent_home.mount_point" . -}}"            
           - name: shared-folder
             mountPath: "{{- include "chaimeleon.persistent_shared_folder.mount_point" . -}}"
-
+          {{- end }}
+          
           #volumeMounts:
           #  - name: superset-home
           #    mountPath: /app/superset_home
@@ -107,20 +108,19 @@ spec:
             - name: trino-plugin
               mountPath: /usr/lib/trino/plugin/chaimeleon
             {{- end }}
-              
+            {{- if eq .Values.platform "chaimeleon" }}
+            {{- if .Values.datasets_list }}
+            {{- range $datasetID := splitList "," .Values.datasets_list }}
+            - name: "{{ $datasetID -}}"
+              mountPath: "{{- include "chaimeleon.datasets.mount_point" $ -}}/{{- $datasetID -}}"
+            {{- end }}
+            {{- end }}
+            {{- end }}
+
           resources:
             requests:
               memory: "{{ .Values.requests.memory }}"
               cpu: "{{ .Values.requests.cpu }}"
-              
-            #{{- if eq .Values.platform "chaimeleon" }}
-            #{{- if .Values.datasets_list }}
-            #{{- range $datasetID := splitList "," .Values.datasets_list }}
-            #- name: "{{ $datasetID -}}"
-            #  mountPath: "{{- include "chaimeleon.datasets.mount_point" $ -}}/{{- $datasetID -}}"              
-            #{{- end }}
-            #{{- end }}
-            #{{- end }}
 
       restartPolicy: Always
       volumes:

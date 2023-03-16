@@ -49,7 +49,12 @@ fi
 echo "
 [program:superset]
 priority=25
-command=/bin/sh -c /usr/bin/run-server.sh
+command=/usr/bin/run-server.sh
+" >> $SUPERVISOR_CONF_FILE
+echo "
+[program:initialize-superset]
+priority=30
+command=/bin/sh /app/initialize-superset.sh
 " >> $SUPERVISOR_CONF_FILE
 
 # Create the connection in guacamole

@@ -41,7 +41,8 @@ data:
   chaimeleon.properties: |
     connector.name=chaimeleon
     chaimeleon.root-path=/home/chaimeleon/datasets
-    chaimeleon.source-file-name=eForms.json
+    chaimeleon.source-file-name=eforms.json
+
 
 ---
 apiVersion: v1
@@ -49,7 +50,7 @@ kind: ConfigMap
 metadata:
   name: datasets
 data:
-  eForms.json: |
+  eforms.json: |
     {
     "metaproject": "ezcrf_metaproject_name",
     "chaimeleon_rep_data": [

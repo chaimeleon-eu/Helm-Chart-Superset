@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-trino
+  labels:
+    app: {{ .Release.Name }}-trino
+  {{- if eq .Values.platform "chaimeleon" }}
+  annotations:
+    {{- include "chaimeleon.annotations.tool_info" . | nindent 4 }}
+    {{- if .Values.datasets_list }}
+    chaimeleon.eu/datasetsIDs: "{{ .Values.datasets_list }}"
+    chaimeleon.eu/datasetsMountPoint: "/home/trino/datasets-chaimeleon"
+    {{- end }}
+  {{- end }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-trino
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-trino
+    spec:
+      containers:
+        - name: trino
+          {{- if eq .Values.platform "chaimeleon" }}
+          image: {{ include "chaimeleon.library-url" . }}/bahia-software/trino:368.2
+          {{- else }}
+          image: trinodb/trino:368
+          {{- end }}
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: trino-config
+              mountPath: /etc/trino
+            - name: trino-catalog
+              mountPath: /etc/trino/catalog
+            - name: datasets
+              mountPath: /home/chaimeleon/datasets/test
+            {{- if not ( eq .Values.platform "chaimeleon" ) }}
+            - name: trino-plugin
+              mountPath: /usr/lib/trino/plugin/chaimeleon
+            {{- end }}
+
+          resources:
+            requests:
+              memory: "{{ .Values.requests.memory }}"
+              cpu: "{{ .Values.requests.cpu }}"
+          ports:
+            - containerPort: 8080
+              name: ptrino
+
+      restartPolicy: Always
+      volumes:
+        - name: shared-data
+          emptyDir: {}
+        #- name: superset-config
+        #  configMap: 
+        #    name: superset-config
+        - name: datasets
+          configMap: 
+            name: datasets
+        - name: trino-config
+          configMap: 
+            name: trino-config
+        - name: trino-catalog
+          configMap: 
+            name: trino-catalog
+        {{- if not ( eq .Values.platform "chaimeleon" ) }}
+        - name: trino-plugin
+          hostPath:
+            path: /plugin/chaimeleon
+        {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trino
+spec:
+  selector:
+    app: {{ .Release.Name }}-trino
+  type: ClusterIP
+  ports:
+    - name: trino-svc
+      port: 8080
+      targetPort: ptrino

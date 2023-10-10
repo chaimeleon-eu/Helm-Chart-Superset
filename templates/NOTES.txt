@@ -9,19 +9,29 @@ There should be a connection created for that desktop with the following name:
   {{ include "superset.connectionName" . }}
 It can take few seconds to appear (refresh the page if you do not see it).
 
-And remember...
+## Notes for Superset
 
-    To show/hide the Guacamole menu: CTRL+SHIFT+ALT
+There is a shortcut in the desktop for opening the Superset web interface in the browser.  
+The credentials for accessing are (username/password): admin/admin
 
-    In the file explorer, there will be three important directories:
-     - {{ include "chaimeleon.datasets.mount_point" . }}
-       [All the datasets you selected to work with]
+Once in the Superset dashboard you can go to "Data" -> "Databases" and create a new database.
+Now go to the bottom section "choose from a list" and select "trino" in "SUPPORTED DATABASES".
+Now in the field "SQLALCHEMY URI" you should write:  
+`trino://trino@trino:8080/chaimeleon`
 
-     - {{ include "chaimeleon.persistent_home.mount_point" . }}
-       [Private persistent storage: for your algoritms, results and whatever you need for the work]
+## Notes for the desktop environment
 
-     - {{ include "chaimeleon.persistent_shared_folder.mount_point" . }}
-        [Public storage where you can share files with the other CHAIMELEON users]
+To show/hide the Guacamole menu: CTRL+SHIFT+ALT
+
+In the file explorer, there will be three important directories:
+ - {{ include "chaimeleon.datasets.mount_point" . }}
+   [All the datasets you selected to work with]
+
+ - {{ include "chaimeleon.persistent_home.mount_point" . }}
+   [Private persistent storage: for your algoritms, results and whatever you need for the work]
+
+ - {{ include "chaimeleon.persistent_shared_folder.mount_point" . }}
+    [Public storage where you can share files with the other CHAIMELEON users]
 
 {{- else }}
 Your instance is accessible in the following URL:

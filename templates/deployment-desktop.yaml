@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-superset
+  labels:
+    app: {{ .Release.Name }}-superset
+  {{- if eq .Values.platform "chaimeleon" }}
+  annotations:
+    {{- include "chaimeleon.annotations.tool_info" . | nindent 4 }}
+    {{- include "chaimeleon.annotations.mount_persistent_home_and_shared" . | nindent 4 }}
+    {{- include "chaimeleon.annotations.desktop_connection" . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-superset
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-superset
+    spec:
+      containers:
+        - name: superset
+          {{- if eq .Values.platform "chaimeleon" }}
+          image: {{ include "chaimeleon.library-url" . }}/bahia-software/superset_desktop:latest
+          {{- else }}
+          image: public.ecr.aws/e6k1b4j9/chaimeleon/superset:latest
+          {{- end }}
+          imagePullPolicy: Always
+          env:
+            # password for "chaimeleon" (OS and SSH) user
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Release.Name }}-superset"
+                  key: container-password
+                
+            # password for VNC access (empty username)
+            - name: VNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Release.Name }}-superset"
+                  key: container-password
+            
+            - name: SSH_ENABLE_PASSWORD_AUTH
+              value: "true"
+            - name: GATEWAY_PORTS
+              value: "true"
+            - name: TCP_FORWARDING
+              value: "true"
+          ports:
+            #- containerPort: 8088
+            - containerPort: 2222
+              name: sshd
+            - containerPort: 5900
+              name: vnc-gui
+          
+          #volumeMounts:
+          #  - name: superset-home
+          #    mountPath: /app/superset_home
+          #  - name: superset-config
+          #    mountPath: /app/pythonpath/superset_config.py
+          #    subPath: superset_config.py
+          #volumeMounts:
+          #  - mountPath: /app/pythonpath/superset_config.py
+          #    name: superset-persistent-storage0
+          #  - mountPath: /app/pythonpath/custom_sso_security_manager.py
+          #    name: superset-persistent-storage1
+          #  - mountPath: /app/superset_home
+          #    name: superset-persistent-storage2
+          resources:
+            requests:
+              memory: "{{ .Values.requests.memory }}"
+              cpu: "{{ .Values.requests.cpu }}"
+        
+      restartPolicy: Always
+      volumes:
+        - name: shared-data
+          emptyDir: {}
+        #- name: superset-config
+        #  configMap: 
+        #    name: superset-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-superset
+spec:
+  selector:
+    app: {{ .Release.Name }}-superset
+  type: ClusterIP
+  ports:
+    - name: sshd-svc
+      port: 2222
+      targetPort: sshd
+    - name: vnc-gui-svc
+      port: 5900
+      targetPort: vnc-gui

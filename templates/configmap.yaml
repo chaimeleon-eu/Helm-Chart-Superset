@@ -1241,4 +1241,84 @@ data:
                 "value": -15,
                 "value_type": "integer"
                 },
-      
+              {
+                "var_label": "Study description",
+                "value":"Prostate MRI",
+                "value_type": "string"
+                },
+              {
+                "var_label": "Modality",
+                "value":"MR",
+                "value_type": "string"
+                },
+              {
+                "var_label": "Body part examined",
+                "value": "PELVIS",
+                "value_type": "string"
+                },
+              {
+                "var_label": "IV Contrast",
+                "value": "YES",
+                "value_type": "string"
+                },
+              {
+                "var_label": "Radiopharmaceutical",
+                "value": null,
+                "value_type": "string"
+                },
+              {
+                "var_label": "Time point",
+                "value": "Diagnosis",
+                "value_type": "string"
+                }
+              ],
+              "omop_data": {
+                "table_name": "IMAGING_OCCURRENCE"}
+              },
+            {
+              "entry_num": 2,
+              "field_list": [
+                {
+                  "var_label": "Date - relative time in days from t1",
+                  "value": 90,
+                  "value_type": "integer"
+                  },
+                {
+                  "var_label": "Study description",
+                  "value":"Whole body PET-CT",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Modality",
+                  "value": ["PT","CT"],
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Body part examined",
+                  "value": "WHOLEBODY",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "IV Contrast",
+                  "value": "YES",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Radiopharmaceutical",
+                  "value": "Choline",
+                  "value_type": "string"
+                  },
+                {
+                  "var_label": "Time point",
+                  "value": "Follow-up",
+                  "value_type": "string"
+                  }
+                ],
+                "omop_data": {
+                  "table_name": "IMAGING_OCCURRENCE"}
+              }
+            ]
+          }
+        }
+      ]
+    }

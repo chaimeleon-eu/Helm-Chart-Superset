@@ -6,5 +6,11 @@
 
 {{/* Print the name for the Guacamole connection. */}}
 {{- define "superset.connectionName" -}}
-{{- now | date "2006-01-02-15-04-05" }}--{{ .Release.Name }}-superset
+DATE-TIME---{{ .Release.Name }}-superset
 {{- end }}
+
+{{/* Print a random string (useful for generate passwords). */}}
+{{- define "utils.randomString" -}}
+{{- randAlphaNum 20 -}}
+{{- end }}
+

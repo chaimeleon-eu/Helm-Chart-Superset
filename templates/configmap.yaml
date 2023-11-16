@@ -40,7 +40,7 @@ metadata:
 data:
   chaimeleon.properties: |
     connector.name=chaimeleon
-    chaimeleon.root-path=/home/chaimeleon/datasets
+    chaimeleon.root-path=/home/trino/datasets-chaimeleon
     chaimeleon.source-file-name=eforms.json
 
 

@@ -1,4 +1,4 @@
-FROM apache/superset:1.5.3
+FROM apache/superset:4.0.2
 # Switching to root to install the required packages
 USER root
 RUN pip install --no-cache-dir Authlib sqlalchemy-trino psycopg2 cx_Oracle pystan==2.19.1.1 prophet holidays==0.10.3
